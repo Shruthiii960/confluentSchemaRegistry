@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:file="http://www.mulesoft.org/schema/mule/file" xmlns:confluent-schema-registry="http://www.mulesoft.org/schema/mule/confluent-schema-registry"
+	xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
+	xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd
+http://www.mulesoft.org/schema/mule/confluent-schema-registry http://www.mulesoft.org/schema/mule/confluent-schema-registry/current/mule-confluent-schema-registry.xsd
+http://www.mulesoft.org/schema/mule/file http://www.mulesoft.org/schema/mule/file/current/mule-file.xsd">
+	<flow name="jsontobinaryFlow" doc:id="27656b23-61e0-4327-9565-12f98228c976" >
+		<http:listener doc:name="Listener" doc:id="16875425-4987-4559-bbfb-ae604ac05151" config-ref="HTTP_Listener_config" path="/jsontobinary"/>
+		<ee:transform doc:name="Transform Message" doc:id="032444be-c2e8-494f-a3fe-67a9a06ef1ef" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/avro schemaUrl='classpath://sample-canonical-model.avsc'
+---
+payload]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<confluent-schema-registry:replace-avro-schema-with-id doc:name="Replace AVRO schema with id" doc:id="93c19587-a2b2-4fd1-bb47-59eb45645fde" config-ref="Confluent_Schema_Registry_Connector_Config" subject="employee-canonical-model"/>
+		<set-payload value="#[payload]" doc:name="Set Payload" doc:id="decb25d8-6cdf-4a3a-820e-6289a6ee8ee9" mimeType="application/avro"/>
+		<file:write doc:name="Write" doc:id="560ceaf7-2ee7-4a21-a9eb-0b662ce63ae4" path="C:\Users\admin\Desktop\Meetup\Output Files\jsontobinary-ccr.avro"/>
+	</flow>
+</mule>

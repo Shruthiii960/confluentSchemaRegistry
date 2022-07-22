@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:confluent-schema-registry="http://www.mulesoft.org/schema/mule/confluent-schema-registry"
+	xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/confluent-schema-registry http://www.mulesoft.org/schema/mule/confluent-schema-registry/current/mule-confluent-schema-registry.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+	<http:listener-config name="HTTP_Listener_config" doc:name="HTTP Listener config" doc:id="10cad1b0-fb34-4e8f-b6cd-52b838e78702" >
+		<http:listener-connection host="0.0.0.0" port="8081" />
+	</http:listener-config>
+	<confluent-schema-registry:config name="Confluent_Schema_Registry_Connector_Config" doc:name="Confluent Schema Registry Connector Config" doc:id="6a9bc9f9-f985-4adf-b233-2b92698e2297" >
+		<confluent-schema-registry:basic-auth-connection/>
+	</confluent-schema-registry:config>
+	<flow name="registerSchemaFlow" doc:id="213c6464-7aa1-4b04-931b-c6bb1c4be49d" >
+		<http:listener doc:name="Listener" doc:id="b62ea1e3-0e54-4b8a-be86-75bc8d15bb36" config-ref="HTTP_Listener_config" path="/register"/>
+		<set-payload value="#['{&quot;schema&quot;: &quot;' ++ payload ++ '&quot; }']" doc:name="Set Payload" doc:id="5da931e0-459a-4eea-9e4b-9cf791b17d0b" />
+		<confluent-schema-registry:register-schema-for-subject doc:name="Register schema for subject" doc:id="fc504fc3-b2c9-4d94-8ef9-c32262417d91" config-ref="Confluent_Schema_Registry_Connector_Config" subjectUriParam="employee-canonical-model">
+			<confluent-schema-registry:custom-headers ><![CDATA[#[output application/java
+---
+{
+	"Content-Type" : "application/vnd.schemaregistry.v1+json"
+}]]]></confluent-schema-registry:custom-headers>
+		</confluent-schema-registry:register-schema-for-subject>
+		<logger level="INFO" doc:name="Logger" doc:id="e1353600-6450-4143-a516-267376af4d77" message="Schema Registered Successfully"/>
+	</flow>
+</mule>

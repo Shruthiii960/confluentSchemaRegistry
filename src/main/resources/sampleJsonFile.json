@@ -1,0 +1,16 @@
+[
+	{
+		"employees": [
+		{
+			"employeeName": "Shruthi",
+			"employeeId": "ABC123",
+			"addressType": "Personal",
+			"addressLine1": "Street XYZ",
+			"addressLine2": null,
+			"mobile": "123456789",
+			"email": "abc@gmail.com",
+			"website": null
+	  } 
+    ] 
+  }
+]
