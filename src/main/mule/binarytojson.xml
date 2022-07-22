@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:file="http://www.mulesoft.org/schema/mule/file" xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
+	xmlns:confluent-schema-registry="http://www.mulesoft.org/schema/mule/confluent-schema-registry"
+	xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/confluent-schema-registry http://www.mulesoft.org/schema/mule/confluent-schema-registry/current/mule-confluent-schema-registry.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd
+http://www.mulesoft.org/schema/mule/file http://www.mulesoft.org/schema/mule/file/current/mule-file.xsd">
+	<flow name="binarytojsonFlow" doc:id="b0c9a582-5659-499a-9288-6022835d4391" >
+		<http:listener doc:name="Listener" doc:id="959cc33c-93ec-4790-9a77-db9dac20bb55" config-ref="HTTP_Listener_config" path="/binarytojson"/>
+		<confluent-schema-registry:get-schema-by-id doc:name="Get schema by id" doc:id="d71dbcaf-e294-4a56-9670-9392aeaf5c54" config-ref="Confluent_Schema_Registry_Connector_Config" idUriParam="100002" target="employeeSchema"/>
+		<confluent-schema-registry:replace-id-with-avro-schema doc:name="Replace id with AVRO schema" doc:id="e84b09ed-6a87-4e0b-939b-9fecb85522f9" config-ref="Confluent_Schema_Registry_Connector_Config">
+			<confluent-schema-registry:schema ><![CDATA[#[vars.employeeSchema.schema]]]></confluent-schema-registry:schema>
+		</confluent-schema-registry:replace-id-with-avro-schema>
+		<set-payload value="#[payload]" doc:name="Set Payload" doc:id="9d81cb12-4db5-4f80-b2f8-e3b9f1a88af3" mimeType="application/avro"/>
+		<ee:transform doc:name="Transform Message" doc:id="201aaddb-95cf-4a64-a074-1739eae74cf0" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<file:write doc:id="58993b8f-7b95-4768-b954-8ed39a62d9b0" path="C:\Users\admin\Desktop\Meetup\Output Files\binarytojson-ccr.json"/>
+	</flow>
+</mule>
